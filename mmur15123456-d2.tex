@@ -80,23 +80,24 @@ Queues are not a modern invention related to the field of Computer Science. They
  
  The following gantt chart shows the number of weeks on the X-Axis and the tasks that are to be the executed on the Y-Axis.
  
- \begin{gantt}{10}{12}
+ \begin{gantt}{11}{12}
  \begin{ganttitle}
  \numtitle{1}{1}{12}{1}
  \end{ganttitle}
- \ganttbar{Install Queue Server}{0}{0.5}
- \ganttbar{Benchmark Server}{0.5}{0.5}
- \ganttbar{Replace Storage Layer}{1}{3}
- \ganttbar{Re-Run Benchmarks}{4}{0.5}
- \ganttbar{Compare Benchmarks}{4.5}{1.5}
- \ganttbar{Benchmark on VM}{6}{2}
- \ganttbar{H/W failure simulation}{8}{2}
- \ganttbar{Compile research results}{10}{1}
+ \ganttbar{Install Queue}{0}{0.5}
+ \ganttbar{Bench. Server}{0.5}{0.5}
+ \ganttbar{Develop Layer}{1}{2}
+ \ganttbar{Replace Layer}{3}{1}
+ \ganttbar{Re-Run Benchs.}{4}{0.5}
+ \ganttbar{Compare Benchs.}{4.5}{1.5}
+ \ganttbar{Bench. on VM}{6}{2}
+ \ganttbar{failure simulation}{8}{2}
+ \ganttbar{Compile results}{10}{1}
  \ganttbar{Finalize paper}{11}{1}
  \end{gantt}
 
  \bigskip
- The first phase involves installing and configuring an open source queueing server. After the installation, several benchmarks are run to see how the server performs in different conditions. The conditions will include different processor speeds, different number of processor cores and varying size of memory. Then the proposed solution is developed and this solution will replace the previously benchmarked queueing servers' storage layer.
+ The first phase involves installing and configuring an open source queueing server. After the installation, several benchmarks are run to see how the server performs in different conditions. The conditions will include different processor speeds, different number of processor cores and varying size of memory. Then the proposed solution is developed and this solution will replace the previously benchmarked queueing servers' storage layer. After the replacement, The benchmark tests are performed again and then compared. Then both the versions are compared based on how they perform on a virtualized environment. To test the effectiveness of memory interleaving, hardware failure is simualated. These tests along with the benchmarks results are  compiled and the paper is finalized based on these results.
  
 
 % references
