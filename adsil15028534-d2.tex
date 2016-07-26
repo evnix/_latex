@@ -14,6 +14,7 @@
 \usepackage{csquotes}
 \usepackage{tikz}
 \usepackage{gantt}
+\usepackage{listings}
 
 \begin{document}
 
@@ -23,7 +24,7 @@
 \maketitle
 
 \begin{abstract}
- In the recent years, Queues have become the de-facto standard for various purposes such as asynchronous processing, buffering and load balancing. Queues basically have two operations, enqueue and dequeue. These operations are parallel in theory but in practice when implemented as a durable queue, they tend to become more akin to an ACID compliant database system and hence loose their ability to perform operations in parallel. The durability of a queue cannot be compromised and yet at the same time, the need for performance is ever more increasing as queues have become the backbone of most distributed systems. This study will focus on Log Structured Storage along with Memory Interleaving and how a combination of these can make it possible for a queue to be durable as well as be able to perform parallel operations at the same time.
+ In the recent years, Queues have emerged as the de-facto standard for various purposes such as asynchronous processing, buffering and load balancing. Queues primarily have two operations, enqueue and dequeue. These operations are parallel in theory but in practice when implemented as a durable queue, they tend to become more akin to an ACID compliant database system and hence loose their ability to perform operations in parallel. The durability of a queue cannot be compromised and yet at the same time, the need for performance is ever more increasing as queues have become the backbone of most distributed systems. This proposal will focus on Log Structured Storage along with Memory Interleaving and how a combination of these could make it possible for a queue to be durable as well as be able to perform parallel operations at the same time.
 \end{abstract}
 
 % TOC
@@ -129,9 +130,9 @@ There could be a mix of both worlds implemented by an opensource job delegation 
 
 \subsection{Log Structured Storage}
 
-Log strucutred storage came as a new file system designed in 1988 and implemented in 1992 called the Log Structured File System \citep{rosenblum1992design}.\\
+Log structured storage came as a new file system designed in 1988 and implemented in 1992 called the Log Structured File System \citep{rosenblum1992design}.\\
 
-As shown in the figure \ref{fig:gdull04}, the older data resides as it is and is not overwritten, new data is simply appended at the end. The pointer to the new location is updated. If at all there is any during the write operation, the data pointer will simply point to the older revision. The writes are all asynchronous and this is the basis of a log structured system  \citep{rosenblum1992design}. 
+As shown in the figure \ref{fig:gdull04}, the older data resides as it is and is not overwritten, new data is simply appended to the end. The pointer to the new location is updated. If at all there is any during the write operation, the data pointer will simply point to the older revision. The writes are all asynchronous and this is the basis of a log structured system  \citep{rosenblum1992design}. 
 
  \begin{figure}
  	\centering
@@ -148,13 +149,13 @@ The problem with file systems or any kind of databases before Log Structured Sto
 Log Structured systems improved the reliability as it became very easy to recover from a crash just by moving the pointer to the previous location. The write speeds had increased as the system was asynchronous and an acknowledgement from the disk was no longer required. Any corruption from the hardware side could now easily be reverted by doing a simple log based undo operation \citep{reuter1980fast}.
 
 \subsubsection{Derivates of Log Structured Storage}
-Due to the data being never over written, they are used for time series databases or historical data access \citep{muth2000lham}. They are used in queues such as Apache Kafka which use log based storage that have multi cursor and "exactly once" delivery support\citep{kreps2011kafka} which is easily possible by a log basd storage structure. Figure \ref{fig:gdull05} shows how messages are stored and segmented.  \\
+Due to the data being never over written, they are used for time series databases or historical data access \citep{muth2000lham}. They are used in queues such as Apache Kafka which use log based storage that have multi cursor and "exactly once" delivery support\citep{kreps2011kafka} which is easily possible by a log based storage structure. Figure \ref{fig:gdull05} shows how messages are stored and segmented.  \\
 
  \begin{figure}
  	\centering
  	\textbf{}\par\medskip
  	\includegraphics[scale=0.5]{5}
- 	\caption{Data inside a Kafka Queueing Server, From \citep{kreps2011kafka}}
+ 	\caption{Data inside a Kafka Queueing Server, from \citep{kreps2011kafka}}
  	\label{fig:gdull05}
  \end{figure}
 
@@ -167,9 +168,9 @@ Another interesting use of Log Structured Storage is in "Log-structured merge-tr
 Reliability of memory is important in any computing system. The data in the memory can either be corrected or reverted back to its previous state. To revert or fix an error, the error must first be detected.
 
 \subsubsection{Memory Reliability Techniques}
-	There are many error detection techqniques,one of the simplest is to use a parity bit wherein number of bits are counted whose value is 1, if the count is odd then the parity bit is set to 1 and if the count is even, the parity bit is set to 0. During the check the the bits are counted again and the new parity is matched against the existing parity bit \citep{b1x}.\\
+	There are many error detection techniques,one of the simplest is to use a parity bit wherein the number of bits are counted whose value is 1, if the count is odd then the parity bit is set to 1 and if the count is even, the parity bit is set to 0. During the check, the bits are counted again and the new parity is matched against the existing parity bit \citep{b1x}.\\
 	
-	Another important technique is the use of hamming code which can detect errors which are upto a length of 2 bits \citep{moon2005error}. But this does not work with larger data sets and only way out is to undo the corrupt data to previous one so that the system can still go on running. One way of reverting to the previous state is by using Memory Interleaving\citep{burnett1970study}.	
+	Another important technique is the use of hamming code which can detect errors which are up to a length of 2 bits \citep{moon2005error}. But this does not work with larger data sets and the only way out is to undo the corrupt data to the previous one so that the system can still go on running. One way of reverting to the previous state is by using Memory Interleaving\citep{burnett1970study}.	
 	
 \subsubsection{Reliability with Memory Interleaving}
 
@@ -209,7 +210,7 @@ Table \ref{table:mylabel} shows memory when it is not interleaved. Data is store
 	\end{tabular}
 \end{table}
 
-Table \ref{table:mylabel2} shows memory when it is interleaved using 2 banks. Data is stored on the even and odd banks. If the data is even it is stored in the even bank and if the data is odd it is stored in the odd bank. If any error occurs in one bank, the data from the other bank is used. 
+Table \ref{table:mylabel2} shows memory when it is interleaved using 2 banks. Data is stored in the even and odd banks. If the data is even it is stored in the even bank and if the data is odd it is stored in the odd bank. If any error occurs in one bank, the data from the other bank is used. 
 
 \subsection{Interleaving Applications}
 Disk Interleaving is one of the primary examples of interleaving \citep{kim1986synchronized0} \citep{kim1991asynchronous} wherein interleaving is used for increasing the speed of data access from multiple disks and for error correction. This proposal uses interleaving to get rid of the WAL(Write Ahead Log) which is used for undoing a transaction\citep{mohan1992aries}.
@@ -221,55 +222,64 @@ Disk Interleaving is one of the primary examples of interleaving \citep{kim1986s
 
 \subsection{Analysis of existing systems}
 
- There are a handful of queueing servers aavailable to be used. Few of these servers are open source and have the necessary components required for the analysis. The analysis will be based on the following
- 
- \begin{description}
- 	\item [Clustering Approach:] 
- 	The queueing system will be analysed to see if they support clustering in the first place. if they support clustering, what kind of clustering do they support - fully mirrored or sharded. This is important as benchmarks may differ based on different clustering techniques. Clustering also defines how the queueing sytem scales \citep{cattell2011scalable} and benchmark tests may have to be tweaked accordingly.
- 	\item [Data Location:]
- 	The queueing system will be analysed to see where it stores the data. The data can be stored either in entirely in primary memory or entirely in the secondary memory such as a disk. It can be a combination of both to improve speeds as most modern queuing servers do.
- 	\item [Logical Abstraction:]
- 	The queueing system can sometimes abstract multiple queues as one. They also have features where one queue can export data to multiple queues. This is checked so that performance benchmarks tests can take into consideration the use of multiple queues. 
- 	
- \end{description}
- 
+There are a handful of queueing servers available to be used. Few of these servers are open source and have the necessary components required for the analysis. The analysis will be based on the following
 
- \subsection{Performance Benchmark Analysis}
- 
- Performance Benchmark tests are done so as to see how existing queueing servers perform under various conditions.
- 
-  \begin{description}
-  	\item [Enqueueing Benchmark:] 
-  	The queueing system will be benchmarked to see how the queue performs based on the number of operations per second. The number of queues will be increased to see how it affects the write operations.
-  	
-  	\item [Dequeueing Benchmark:]
-  	Dequeueing involves both read and write operations as data once read will have to be deleted from the queue as well. The queueing system will be benchmarked to see how the queue performs based on the number of dequeue operations per second. Similar to the enqueueing test, the number of queues will be increased to see how it affects the write operations.
-  	
-  	\item [Queue Creation and Deletion Benchmark:]
-  	The queueing systems can create and delete queues at a certain rate. This rate of creation and deletion will be benchmarked. This is required as the proposal has an entirely new way of creating a queue and this will inevitably affect the time for creation and deletion. 
-  	
-  \end{description}
- 
- 
-  \subsection{Design Goals and Decisions}
+\begin{description}
+	\item [Clustering Approach:] 
+	The queueing system will be analysed to see if they support clustering in the first place. if they support clustering, what kind of clustering do they support - fully mirrored or sharded. This is important as benchmarks may differ based on different clustering techniques. Clustering also defines how the queueing system scales \citep{cattell2011scalable} and benchmark tests may have to be tweaked accordingly.
+	\item [Data Location:]
+	The queueing system will be analysed to see where it stores the data. The data can be stored either in entirely in primary memory or entirely in the secondary memory such as a disk. It can be a combination of both to improve speeds as most modern queuing servers do.
+	\item [Logical Abstraction:]
+	The queueing system can sometimes abstract multiple queues as one. They also have features where one queue can export data to multiple queues. This is checked so that performance benchmarks tests can take into consideration the use of multiple queues. 
+	
+\end{description}
+
+
+\subsection{Performance Benchmark Analysis}
+
+Performance Benchmark tests are done so as to see how existing queueing servers perform under various conditions.
+
+\begin{description}
+	\item [Enqueueing Benchmark:] 
+	The queueing system will be benchmarked to see how the queue performs based on the number of operations per second. The number of queues will be increased to see how it affects the write operations.
+	
+	\item [Dequeueing Benchmark:]
+	Dequeueing involves both read and write operations as data once read will have to be deleted from the queue as well. The queueing system will be benchmarked to see how the queue performs based on the number of dequeue operations per second. Similar to the enqueueing test, the number of queues will be increased to see how it affects the write operations.
+	
+	\item [Queue Creation and Deletion Benchmark:]
+	The queueing systems can create and delete queues at a certain rate. This rate of creation and deletion will be benchmarked. This is required as the proposal has an entirely new way of creating a queue and this will inevitably affect the time for creation and deletion. 
+	
+\end{description}
+
+
+\subsection{Design Goals and Decisions}
+
+  \begin{figure}[!htb]
+  	\centering
+  	\textbf{}\par\medskip
+  	\includegraphics[scale=0.3]{8}
+  	\caption{Log Structure Data Element Specification}
+  	\label{fig:gdull08}
+  \end{figure} 
   
-   
-  \begin{enumerate}
-  	\item A queue for large data (grow till the disk is full).
-  	\item Must be fast.
-	  	\begin{itemize}
-	  		\item Constant performance O(1) irrespective of the size of the queue.
-	  		\item Must allow Parallel Push and Pop operations. 
-	  	\end{itemize}
-  	\item Durable.
-  	  	\begin{itemize}
-  	  		\item Must realize when the meta data pointers are corrupted.
-  	  		\item Must be capable of doing a rollback using the meta data. 
-  	  		\item If required, Rollback even without the meta data file.
-  	  	\end{itemize}
-  	  \item Space recovery without pause
-  \end{enumerate}
-  
+Figure \ref{fig:gdull08} shows the design of the new architure for a durable queue. The goals that must be achieved using the proposed design are as follows:
+
+\begin{enumerate}
+	\item A queue for large data (grow till the disk is full).
+	\item Must be fast.
+	\begin{itemize}
+		\item Constant performance O(1) irrespective of the size of the queue.
+		\item Must allow Parallel Push and Pop operations. 
+	\end{itemize}
+	\item Durable.
+	\begin{itemize}
+		\item Must realize when the metadata pointers are corrupted.
+		\item Must be capable of doing a rollback using the metadata. 
+		\item If required, Rollback even without the metadata file.
+	\end{itemize}
+	\item Space recovery without pause
+\end{enumerate}
+
   
   
   \subsubsection{Header Design}
@@ -283,17 +293,140 @@ Disk Interleaving is one of the primary examples of interleaving \citep{kim1986s
   	\label{fig:gdull06}
   \end{figure}
   
-  As shown in figure \ref{fig:gdull06}, there are two blocks(Push: rows 2 and 3 and Pop: rows 4 and 5). The push block is utilized by a process pushing data into the queue while the pop block is used by a process popping data out of the queue. ID goes on incrementing both for push and pop independently.
-  
-  The Crc32 for a row in the push block is the checksum of Push Id
-  The Crc32 for a row in the pop block is the checksum of Pop Id and Head Offset.
-  
-  The central idea here is to roll back. we know that although disk access can be random, the actual write operation is still linear. we take advantage of this and know for certain that at any given time only one section(even or odd) of a block can get corrupted due to failure.
+As shown in figure \ref{fig:gdull06}, there are two blocks (for Push: rows 2 and 3 and for Pop: rows 4 and 5). The push block is utilized by a process that enqueues data into the queue while the pop block is used by a process dequeuing data out of the queue. ID will go on incrementing both for push and pop independent of each other.
+
+\begin{enumerate}
+	\item The Crc32 for a row in the push block is the checksum of Push Id.
+	\item The Crc32 for a row in the pop block is the checksum of Pop Id and Head Offset.
+\end{enumerate}
+
+
+
+The central idea here is to roll back. It is known that although disk access can be random, the actual write operation is still linear. The proposed design takes advantage of this to be certain that at any given time only one section, either even or odd block can get corrupted due to failure.
+
+ \subsubsection{Log Structure Specifications}
  
  
+  \begin{figure}[!htb]
+  	\centering
+  	\textbf{}\par\medskip
+  	\includegraphics[scale=0.4]{7}
+  	\caption{Log Structure Data Element Specification}
+  	\label{fig:gdull07}
+  \end{figure}
+  
+ Figure \ref{fig:gdull07} shows the Log Structure specification for the data element, It basically consists of 6 fields.
+  
+\begin{description}
+    \item [Error Count:] 
+    The Error Count is a count that holds the number of errors that a data element has gone through. for example, if a node picks the data item and there was an error while processing. The node sends an acknowledgement specifying the error. The queueing server will re-queue the item and increment its error count.
+    
+    \item [Expires:]
+    Some data elements on the queue can be expirable, for example, if the task is to send emails to people on a particular day and the day has passed. The elements which have those tasks will be deleted from the queue by the server. The Expires property stores the expiry timestamp for this purpose.
+    
+    \item [Delete Flag:]
+    The Delete Flag is used for marking an item as deleted on the queue. Since this is a log structured system, There may be instances the same data may be read after recovering from a system crash. The delete flag ensures that the same data is not read again.
+    
+    \item [Unique ID:]
+    The Unique ID is used for uniquely representing a data element on the queue. It is used by the client to send positive or negative acknowledgements against a given UID. 
+	
+	 \item [Data Length:]
+	The Data length field gives the length of the next field, that is the data field. The data field is of variable length and it is required to store the length of the data.
+	
+	 \item [Data:]
+	 This the actual data that will be stored. It has no particular format. It is stored directly as bytes. The client is responsible for doing the entire encoding and decoding of data.
+
+\end{description} 
+
+\subsubsection{Queue Operation Specifications}
+
+\begin{description}
+	\item [Creation:] 
+	Create a file named Qname.meta and Qname-0.data if they do not exist.
+	Fill the Qname.meta with version and records per segment from the config.
+	The rest of the bytes in the meta file must be 0s and the crc32 equivalents of those zeros.
+	
+	\item [Opening an existing queue:]
+	First step is to open the Qname.meta file, Read its contents and decide the correct state of the queue and rollback if necessary.
+	
+	Below is a pseudo showing the various states that a meta file block could be in. It also includes the results or the action that needs to be performed for those conditions.
+	
+	\begin{lstlisting}
+	
+ if(evenCRCValid() && evenID>oddID)
+    header=even
+ else if(oddCRCValid() && oddID>evenID)
+    header=odd
+ else if(evenCRCValid() && oddCRCValid() && evenID==oddID) 
+   //Initial condition
+   header=odd //so that next write starts from even
+ else if(evenCRCValid)
+   header=even
+ else if(oddCRCValid)
+   header=odd
+ else
+   return (Metadata corrupted)
+ end
+	
+	\end{lstlisting}
+	
+	\item [Segment Selection:]
+	The data for a queue is spread over multiple files. Each such file is called a segment. The older segments can be deleted when all the data from them is popped. This allows us to easily reclaim space from the disk. 
+	
+	\item [Push Operation:]
+	\begin{equation}
+	Current Segment =\frac{PushId}{RecordsPerSegment}
+	\end{equation}
+	
+	
+	For Example,\\
+	1. If the PushId is 0 and records per segment is 1000, then the segment where the new record has to be pushed will be 0/1000 i.e, Qname-0.data
+	
+	2. If the PushId is 2500 and records per segment is 1000, then the segment where the new record has to be pushed will be 2500/1000 i.e, Qname-2.data
+	
+	The raw data is converted into a record as described in the record format above. The record is appended to the selected segment. If the PushId+1 is even, the even block is overwritten else the odd block is overwritten \citep{burnett1970study}.
+	
+
+	
+	\item [Pop Operation Specification:]
+	
+		\begin{equation}
+		Current Segment =\frac{PopId}{RecordsPerSegment}
+		\end{equation}
+		
+	The segment file selection will be similar to how the selection was performed for the push operation but the 'Head offset' must be set to zero when current segment is greater than the previous segment.
+	
+	The 'Head offset' is used to seek the record. The record is read after selecting the right segment. The 'Head offset' is incremented. If the PopId+1 is even, the even block is overwritten else the odd block is overwritten \citep{burnett1970study}.
+	
+	Note: “Head offset” must be set to zero when moving to the next segment and older segments can be deleted after the process successfully moves to a new segment.
+	
+	\item [Deletion:]
+	Delete the meta file Qname.meta and all files matching the expression Qname-*.data. This operation will remove all log files along with the meta data.
+	
+	\item [Roll Back Specification:]
+	
+	If the meta file is found to be corrupt, we can re-construct the meta file again by sequentially going through the segment files.
+	Segment files are in the format Qname-0.dat Qname-1.dat and so on.
+	
+	\begin{itemize}
+		\item Select the segment with the smallest index. for ex: Qname-0.dat
+		\item Multiply this index with the "Records per segment" from the config. The result of this will be stored in the meta file in the pop block.
+		\item Read the segment files starting from the smallest index.
+		\item Increment the pop id and head offset when encountered with records that are marked deleted. 
+		\item Continue till no new deleted records are found.
+		\item Similar approach must be followed for Push block, but here stop only when no new records are found.
+	\end{itemize}
+	
+\end{description} 
+  
+ 
+  
  \subsection{Timeline}
  
  The following gantt chart shows the number of weeks on the X-Axis and the tasks that are to be the executed on the Y-Axis.
+ 
+ \bigskip
+ \bigskip
  
  \begin{gantt}{11}{12}
  \begin{ganttitle}
@@ -312,10 +445,20 @@ Disk Interleaving is one of the primary examples of interleaving \citep{kim1986s
  \end{gantt}
 
  \bigskip
-The first phase involves installing and configuring an open source queueing server. After the installation, several benchmarks are run to see how the server performs in different conditions. The conditions will include different processor speeds, different number of processor cores and varying size of memory. Then the proposed solution is developed and this solution will replace the previously benchmarked queueing servers' storage layer. After the replacement, The benchmark tests are performed again and then compared. Then both the versions are compared based on how they perform in a virtualized environment. To test the effectiveness of memory interleaving, hardware failure is simulated. These tests along with the benchmarks results are  compiled and the paper is finalized based on these results.
+ 
+\begin{itemize}
+	\item The first phase involves installing and configuring an open source queueing server. 
+	\item After the installation, several benchmarks are run to see how the server performs in different conditions. The conditions will include different processor speeds, different number of processor cores and varying size of memory. 
+	\item Then the proposed solution is developed and this solution will replace the previously benchmarked queueing server's storage layer. 
+	\item After the replacement, The benchmark tests are performed again on the server that has the newly proposed solution and then the benchmarks are compared. 
+	\item Then both the versions are compared based on how they perform in a virtualized environment to see if there is any difference compared to a bare metal environment. Testing on a virtual environment is important as cloud computing environments used shared disk rather than a dedicated one and hence performance may vary \citep{liu2014performance}.
+	 \item To test the effectiveness of memory interleaving, hardware failure is simulated by halting the machine abruptly. 
+	\item These tests along with the benchmarks results are  compiled and a final outcome is reached whether the proposed solution works as expected.
+	\item The paper is finalized based on these results.
+\end{itemize}
 
 \section{Conclusion}
-f
+In a world where the amount of data is increasing at an exponential rate and where queues bear the burden of this data acting as a backbone of distributed systems, this proposal presents a novel approach to parallelizing operations on a durable queue and expecting that queues will be less of a performance bottleneck in the future. It describes how methods such as Memory Interleaving used in the world of High-Performance Computing could be used for a very different purpose of increasing the durability of a queue and how combining it with a Log Structured Storage for storing queue elements could be used to parallelize operations on a queue. It further describes the timeline,designs and specifications on how to go about implementing the proposal and it includes the methods for verification. 
 
 % references
 \bibliographystyle{dcu}
